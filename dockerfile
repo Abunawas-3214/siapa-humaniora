@@ -5,21 +5,16 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Install dependencies first
 COPY package*.json ./
 RUN npm ci
 
-# Copy Prisma schema + env before build (so npx prisma generate can work)
 COPY prisma ./prisma
-COPY .env .env
 
-# Generate Prisma client (does NOT need a DB)
+# Run prisma generate safely (skip errors)
 RUN npx prisma generate || echo "Skipping Prisma generate during build"
 
-# Copy the rest of the source code
 COPY . .
 
-# Build the Next.js app
 RUN npm run build
 
 # ------------------------
@@ -30,15 +25,12 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Copy necessary files from builder
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
 
-# Expose port 3000
 EXPOSE 3000
 
-# Run Prisma generate again (to ensure client is present)
 CMD npx prisma generate && npm start
