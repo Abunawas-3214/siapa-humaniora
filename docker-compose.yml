@@ -5,7 +5,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      pull_policy: build
     ports:
       - "3000:3000"
     depends_on:
