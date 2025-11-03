@@ -1,0 +1,118 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum EmailStatus {
+  PENDING // The assignment was created, but email hasn't been attempted yet
+  SENT // Email was successfully sent to the user
+  FAILED // Email failed to send (e.g., mail server error, bad email address)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String
+  jabatan       String?
+  isAdmin       Boolean   @default(false)
+  isSuperAdmin  Boolean   @default(false)
+
+  suratMasukAssignment SuratMasukDisposisi[]
+
+  accounts Account[]
+  sessions Session[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model SuratMasuk {
+  id          String   @id @default(cuid())
+  judul       String
+  tanggal     DateTime
+  pengirim    String
+  keterangan  String?
+  fileUrl     String   @map("file_url")
+  isEmailSent Boolean  @default(false) @map("is_email_sent")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  assignedUsers SuratMasukDisposisi[]
+}
+
+model SuratMasukDisposisi {
+  suratMasukId String
+  userId       String
+  assignedAt   DateTime @default(now())
+
+  emailStatus       EmailStatus @default(PENDING)
+  emailSentAt       DateTime?   @map("email_sent_at")
+  emailErrorMessage String?     @map("email_error_message")
+
+  suratMasuk SuratMasuk @relation(fields: [suratMasukId], references: [id], onDelete: Cascade)
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([suratMasukId, userId])
+  @@map("surat_masuk_disposisi")
+}
+
+model SuratKeluar {
+  id          String   @id @default(cuid())
+  judul       String
+  tanggal     DateTime
+  penerima    String
+  keterangan  String?
+  fileUrl     String   @map("file_url")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
