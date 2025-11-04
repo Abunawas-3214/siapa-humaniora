@@ -60,42 +60,46 @@ const chartDataByYear: Record<string, { month: string; masuk: number; keluar: nu
 
 
 
-export default function SuratChart({chartDataByYear}: {chartDataByYear:SuratChartData}) {
-  const years = Object.keys(chartDataByYear).sort().reverse() 
+export default function SuratChart({ chartDataByYear }: { chartDataByYear: SuratChartData }) {
+  const years = Object.keys(chartDataByYear).sort().reverse()
   const latestYear = years[0]
   const [year, setYear] = useState(latestYear)
-  const chartData = chartDataByYear[year]
+
+  const chartData = chartDataByYear[year] || [] // 👈 fallback if undefined
 
   const totals = {
-    masuk: chartData.reduce((a, b) => a + b.masuk, 0),
-    keluar: chartData.reduce((a, b) => a + b.keluar, 0),
+    masuk: chartData.reduce((a, b) => a + (b.masuk || 0), 0),
+    keluar: chartData.reduce((a, b) => a + (b.keluar || 0), 0),
   }
+
+  const hasData = chartData.length > 0
 
   return (
     <Card className="w-full">
-      {/* Header */}
       <CardHeader className="flex flex-row items-start justify-between pb-2 border-b">
         <div className="space-y-1">
           <CardTitle className="text-lg font-semibold">
             Surat Masuk & Keluar per Bulan
           </CardTitle>
 
-          {/* Dropdown for year */}
-          <Select value={year} onValueChange={setYear}>
-            <SelectTrigger className="w-[120px] text-sm">
-              <SelectValue placeholder="Pilih Tahun" />
-            </SelectTrigger>
-            <SelectContent>
-              {years.map((yr) => (
-                <SelectItem key={yr} value={yr}>
-                  {yr}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {years.length > 0 ? (
+            <Select value={year} onValueChange={setYear}>
+              <SelectTrigger className="w-[120px] text-sm">
+                <SelectValue placeholder="Pilih Tahun" />
+              </SelectTrigger>
+              <SelectContent>
+                {years.map((yr) => (
+                  <SelectItem key={yr} value={yr}>
+                    {yr}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <p className="text-sm text-muted-foreground">Belum ada data</p>
+          )}
         </div>
 
-        {/* Summary total */}
         <div className="flex gap-6">
           <div className="text-right">
             <p className="text-sm text-muted-foreground">Surat Masuk</p>
@@ -112,19 +116,24 @@ export default function SuratChart({chartDataByYear}: {chartDataByYear:SuratChar
         </div>
       </CardHeader>
 
-      {/* Chart */}
       <CardContent className="pt-4 h-[350px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="masuk" fill="#3b82f6" name="Surat Masuk" />
-            <Bar dataKey="keluar" fill="#10b981" name="Surat Keluar" />
-          </BarChart>
-        </ResponsiveContainer>
+        {hasData ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="masuk" fill="#3b82f6" name="Surat Masuk" />
+              <Bar dataKey="keluar" fill="#10b981" name="Surat Keluar" />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="flex items-center justify-center h-full text-muted-foreground">
+            Tidak ada data surat untuk ditampilkan
+          </div>
+        )}
       </CardContent>
     </Card>
   )

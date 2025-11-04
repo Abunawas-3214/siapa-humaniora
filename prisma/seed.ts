@@ -1,3 +1,4 @@
+// import { prisma } from "@/lib/prisma";
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 

@@ -1,15 +1,14 @@
 'use server'
 
 import { createSuratKeluarSchema } from "@/schemas/surat-keluar"
-import { PrismaClient } from "@prisma/client"
+import { Prisma} from "@prisma/client"
+import { prisma } from "@/lib/prisma";
 import fs from 'fs/promises'
 import { revalidatePath } from "next/cache"
 import path from "path"
 import { revalidateSuratChart } from "./surat-data"
 
-const prisma = new PrismaClient()
-
-const PUBLIC_DIR = path.join(process.cwd(), 'public', 'surat-keluar')
+const PUBLIC_DIR = path.join(process.cwd(), 'uploads', 'surat-keluar')
 
 export async function createSuratKeluar(data: FormData) {
 	const rawData = {
@@ -41,10 +40,10 @@ export async function createSuratKeluar(data: FormData) {
 	await fs.mkdir(PUBLIC_DIR, { recursive: true })
 	await fs.writeFile(filePath, buffer)
 
-	const fileUrl = `/surat-keluar/${filname}`
+	const fileUrl = `/uploads/surat-keluar/${filname}`
 
 	try {
-		await prisma.$transaction(async (tx) => {
+		await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
 			const suratKeluar = await tx.suratKeluar.create({
 				data: {
 					judul,
@@ -96,7 +95,7 @@ export async function updateSuratKeluar(id: string, data: FormData) {
 		if (file && file.size > 0) {
 			const existingSurat = await prisma.suratKeluar.findUnique({ where: { id }, select: { fileUrl: true } })
 			if (existingSurat?.fileUrl) {
-				const existingFilePath = path.join(process.cwd(), 'public', existingSurat.fileUrl)
+				const existingFilePath = path.join(process.cwd(), 'uploads', existingSurat.fileUrl)
 				await fs.unlink(existingFilePath).catch((err) => {
 					console.warn('Failed to delete existing file:', err.message);
 				})
@@ -108,7 +107,7 @@ export async function updateSuratKeluar(id: string, data: FormData) {
 			await fs.mkdir(PUBLIC_DIR, { recursive: true })
 			await fs.writeFile(filePath, buffer)
 
-			newfileUrl = `/surat-keluar/${filname}`
+			newfileUrl = `/uploads/surat-keluar/${filname}`
 		}
 	} catch (error) {
 		console.error('FILE HANDLING ERROR:', error);
@@ -119,7 +118,7 @@ export async function updateSuratKeluar(id: string, data: FormData) {
 	}
 
 	try {
-		await prisma.$transaction(async (tx) => {
+		await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
 			await tx.suratKeluar.update({
 				where: { id },
 				data: {
@@ -151,7 +150,7 @@ export async function deleteSuratKeluar(id: string) {
 		select: { fileUrl: true },
 	})
 	if (suratKeluar?.fileUrl) {
-		const filePath = path.join(process.cwd(), 'public', suratKeluar.fileUrl)
+		const filePath = path.join(process.cwd(), 'uploads', suratKeluar.fileUrl)
 		await fs.unlink(filePath).catch((err) => {
 			console.warn('Failed to delete file during record deletion:', err.message);
 		})

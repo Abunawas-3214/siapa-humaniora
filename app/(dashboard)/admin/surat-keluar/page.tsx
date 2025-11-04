@@ -3,11 +3,9 @@ import Link from 'next/link'
 import React from 'react'
 import DataTable from './data-table'
 import { columns } from './column'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from "@/lib/prisma";
 
 export default async function SuratKeluar() {
-	const prisma = new PrismaClient()
-
   const data = await prisma.suratKeluar.findMany({
     orderBy: {
       createdAt: 'desc',

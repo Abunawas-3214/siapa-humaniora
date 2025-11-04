@@ -2,10 +2,8 @@
 
 import { revalidatePath } from 'next/cache'
 import { hash } from 'bcryptjs'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from "@/lib/prisma";
 import { CreateUserInput, createUserSchema, UpdateUserInput, updateUserSchema } from '@/schemas/user'
-
-const prisma = new PrismaClient()
 
 export async function createUser(data: CreateUserInput) {
 	// Validate the input data using Zod schema

@@ -1,10 +1,9 @@
+import { prisma } from "@/lib/prisma";
 import SuratKeluarForm from '@/components/surat-keluar-form'
-import { PrismaClient } from '@prisma/client'
 import { notFound } from 'next/navigation'
 import React from 'react'
 
 export default async function EditSuratKeluar({ params }: { params: Promise<{ id: string }> }) {
-	const prisma = new PrismaClient()
 	const { id } = await params
 	const suratMasuk = await prisma.suratKeluar.findUnique({
 		where: { id },

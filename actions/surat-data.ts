@@ -1,10 +1,8 @@
 "use server"
 
-import { PrismaClient } from "@prisma/client"
+import { prisma } from "@/lib/prisma";
 import { SuratChartData } from "@/types/SuratData"
 import { revalidateTag, unstable_cache } from "next/cache"
-
-const prisma = new PrismaClient()
 
 const MONTHS = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",

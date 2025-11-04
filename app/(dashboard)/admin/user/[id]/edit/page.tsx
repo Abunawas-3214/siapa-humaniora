@@ -1,10 +1,9 @@
 import React from 'react'
+import { prisma } from "@/lib/prisma";
 import { UserForm } from '@/components/user-form'
-import { PrismaClient } from '@prisma/client'
 import { notFound } from 'next/navigation'
 
 export default async function EditUser({ params }: { params: Promise<{ id: string }> }) {
-  const prisma = new PrismaClient()
   const { id } = await params
   const user = await prisma.user.findUnique({
     where: { id },

@@ -1,10 +1,9 @@
+import { prisma } from "@/lib/prisma";
 import SuratMasukForm from '@/components/surat-masuk-form'
-import { PrismaClient } from '@prisma/client'
 import { notFound } from 'next/navigation'
 import React from 'react'
 
 export default async function EditSuratMasuk({ params }: { params: Promise<{ id: string }> }) {
-  const prisma = new PrismaClient()
   const { id } = await params
   const suratMasuk = await prisma.suratMasuk.findUnique({
     where: { id },

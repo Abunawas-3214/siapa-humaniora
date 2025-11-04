@@ -1,0 +1,12 @@
+# Dependencies and build artifacts
+node_modules
+.next
+dist
+
+
+# Version control and debug files
+.git
+.gitignore
+.vscode
+npm-debug.log*
+yarn-error.log*

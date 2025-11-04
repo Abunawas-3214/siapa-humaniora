@@ -1,7 +1,8 @@
 'use server'
 
-import { PrismaClient, EmailStatus } from "@prisma/client"
-import { CreateSuratMasukInput, createSuratMasukSchema, updateSuratMasukSchema } from "@/schemas/surat-masuk"
+import { prisma } from "@/lib/prisma";
+import { EmailStatus, Prisma } from "@prisma/client"
+import { createSuratMasukSchema, updateSuratMasukSchema } from "@/schemas/surat-masuk"
 import path from "path"
 import fs from "fs/promises"
 import nodemailer from "nodemailer"
@@ -92,8 +93,7 @@ async function sendNotificationEmail(
 }
 // --- End Email Function ---
 
-const prisma = new PrismaClient()
-const PUBLIC_DIR = path.join(process.cwd(), 'public', 'surat-masuk')
+const PUBLIC_DIR = path.join(process.cwd(), 'uploads', 'surat-masuk')
 
 export async function createSuratMasuk(data: FormData) {
   // Validate data if needed
@@ -144,12 +144,12 @@ export async function createSuratMasuk(data: FormData) {
   await fs.mkdir(PUBLIC_DIR, { recursive: true })
   await fs.writeFile(filePath, buffer)
 
-  const fileUrl = `/surat-masuk/${filename}`
+  const fileUrl = `/uploads/surat-masuk/${filename}`
   let suratMasukId: string | null = null;
 
   // Save record to database
   try {
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const suratMasuk = await tx.suratMasuk.create({
         data: {
           judul,
@@ -282,7 +282,7 @@ export async function updateSuratMasuk(id: string, data: FormData) {
 
       // 1a. Delete Old File
       if (existingSurat?.fileUrl) {
-        const oldFilePath = path.join(process.cwd(), 'public', existingSurat.fileUrl);
+        const oldFilePath = path.join(process.cwd(), 'uploads', existingSurat.fileUrl);
         await fs.unlink(oldFilePath).catch(err => {
           console.warn('Warning: Failed to delete old file:', err.message);
         });
@@ -295,7 +295,7 @@ export async function updateSuratMasuk(id: string, data: FormData) {
 
       await fs.mkdir(PUBLIC_DIR, { recursive: true });
       await fs.writeFile(filePath, buffer);
-      newFileUrl = `/surat-masuk/${filename}`;
+      newFileUrl = `/uploads/surat-masuk/${filename}`;
     }
   } catch (error) {
     console.error('File operation error during update:', error);
@@ -306,7 +306,7 @@ export async function updateSuratMasuk(id: string, data: FormData) {
 
   // --- 2. DATABASE TRANSACTION (Update, Add/Remove Disposisi) ---
   try {
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // 2a. Get Current Disposisi
       const currentDisposisi = await tx.suratMasukDisposisi.findMany({
         where: { suratMasukId: id },
@@ -453,7 +453,7 @@ export async function deleteSuratMasuk(id: string) {
     })
 
     if (suratMasuk?.fileUrl) {
-      const filePath = path.join(process.cwd(), 'public', suratMasuk.fileUrl)
+      const filePath = path.join(process.cwd(), 'uploads', suratMasuk.fileUrl)
       await fs.unlink(filePath).catch((err) => {
         console.error('File deletion error (may not exist):', err);
       })

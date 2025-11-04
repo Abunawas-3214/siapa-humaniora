@@ -1,9 +1,8 @@
-import { PrismaClient } from '@prisma/client'
+import { prisma } from "@/lib/prisma";
 import SuratMasukForm from '@/components/surat-masuk-form'
 import React from 'react'
 
 export default async function TambahSuratMasuk() {
-    const prisma = new PrismaClient()
     const user = await prisma.user.findMany({
         select: {
             id: true,
@@ -18,4 +17,3 @@ export default async function TambahSuratMasuk() {
         </div>
     )
 }
-

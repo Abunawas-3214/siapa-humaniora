@@ -1,11 +1,10 @@
+import { prisma } from "@/lib/prisma";
 import { Button } from '@/components/ui/button'
 import React from 'react'
 import Link from 'next/link'
-import { PrismaClient } from '@prisma/client'
 import DataTableClient from './data-table-client'
 
 export default async function User() {
-	const prisma = new PrismaClient()
 
 	const userData = await prisma.user.findMany(
 		{orderBy:
