@@ -5,6 +5,9 @@ FROM node:20-alpine AS builder
 # Tentukan direktori kerja di container
 WORKDIR /app
 
+# apk add --no-cache memasang build tools yang dibutuhkan oleh beberapa dependensi npm
+RUN apk add --no-cache python3 make g++
+
 # Copy package.json dan package-lock.json 
 COPY package.json package-lock.json ./
 
