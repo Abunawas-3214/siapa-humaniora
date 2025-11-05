@@ -2,6 +2,8 @@ import { getCachedSuratChartData } from '@/actions/surat-data'
 import SuratChart from '@/components/surat-chart'
 import React from 'react'
 
+export const dynamic = 'force-dynamic';
+
 export default async function Statistik() {
   const chartData = await getCachedSuratChartData()
   return (

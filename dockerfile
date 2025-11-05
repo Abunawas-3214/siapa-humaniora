@@ -1,32 +1,54 @@
-FROM node:20-alpine
+# --- STAGE 1: Build Image ---
+# Gunakan image node yang sesuai untuk build
+FROM node:20-alpine AS builder
+
+# Tentukan direktori kerja di container
 WORKDIR /app
 
-# 1. Install system dependencies needed for MySQL and Prisma engines
-RUN apk add --no-cache openssl openssh bash
+# Copy package.json dan package-lock.json 
+COPY package.json package-lock.json ./
 
-# 2. Copy dependency files first
-COPY package*.json ./
-
-# 3. Install dependencies (prod and dev) for the Linux platform
-# This step creates the correct Linux-native node_modules folder.
+# Install dependensi
 RUN npm install
 
-# 4. Copy all application files (overwrite the files copied in step 2)
+# Copy seluruh file aplikasi
 COPY . .
 
-# 5. Run Prisma generate to ensure the client is built for the current platform
+# *** KUNCI SOLUSI INI: Gunakan DATABASE_URL palsu/dummy untuk build-time ***
+# Ini memungkinkan 'prisma generate' dan 'npm run build' berjalan tanpa koneksi DB.
+# Pastikan skema koneksi sesuai dengan MySQL.
+ENV DATABASE_URL="mysql://user:password@localhost:3306/mydb?schema=public"
+
+# Lakukan generate Prisma Client
 RUN npx prisma generate
 
-# 6. Execute Migrations and Seed during the build (since we have the DATABASE_URL available via the .env file)
-# NOTE: This requires the database to be running *at build time* if run locally, or we need to pass a fake one.
-# Since you're targeting a production style, we will skip the build-time migration/seed.
-
-# 7. Build the Next.js application
+# Lakukan build aplikasi Next.js
 RUN npm run build
 
-# Expose the application port
+# --- STAGE 2: Production Image ---
+# Image yang lebih kecil dan hanya untuk menjalankan aplikasi
+FROM node:20-alpine AS runner
+
+# Set environment variabel untuk Node.js di Production
+ENV NODE_ENV=production
+
+WORKDIR /app
+
+# Copy file build dari builder stage
+# Salin hanya yang diperlukan untuk menjalankan aplikasi.
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/next.config.ts ./next.config.ts
+# Pastikan hasil generate Prisma Client dicopy
+COPY --from=builder /app/node_modules/.prisma/client ./node_modules/.prisma/client
+
+# Ekspos port yang digunakan Next.js (biasanya 3000)
 EXPOSE 3000
 
-# We don't need the entrypoint script anymore.
-# We will use the proper Prisma commands and then start the app.
-CMD npx prisma migrate deploy && npm run prisma-seed && npm start
+# Jalankan aplikasi. 
+# *** CATATAN PENTING: DATABASE_URL yang VALID harus diberikan saat RUN-TIME! ***
+# Misalnya, melalui 'docker run -e' atau 'docker-compose.yml'
+CMD ["npm", "start"]

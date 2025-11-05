@@ -3,6 +3,8 @@ node_modules
 .next
 dist
 
+# Env
+.env
 
 # Version control and debug files
 .git

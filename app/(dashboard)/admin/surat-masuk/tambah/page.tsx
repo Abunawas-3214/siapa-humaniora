@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import SuratMasukForm from '@/components/surat-masuk-form'
 import React from 'react'
 
+export const dynamic = 'force-dynamic';
+
 export default async function TambahSuratMasuk() {
     const user = await prisma.user.findMany({
         select: {

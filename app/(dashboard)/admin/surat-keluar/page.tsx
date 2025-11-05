@@ -5,6 +5,8 @@ import DataTable from './data-table'
 import { columns } from './column'
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = 'force-dynamic';
+
 export default async function SuratKeluar() {
   const data = await prisma.suratKeluar.findMany({
     orderBy: {
