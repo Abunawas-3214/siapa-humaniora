@@ -146,7 +146,6 @@ export function DataTable<TData extends SuratMasuk, TValue>({ columns, data, }: 
 										data-state={row.getIsSelected() && "selected"}
 										onClick={() => {
 											handleRowClick(row);
-											console.log(row.original);
 										}}
 										className={rowClassName} // 👈 Apply dynamic class here
 									>

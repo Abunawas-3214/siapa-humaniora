@@ -50,9 +50,8 @@ export function VersionSwitcher({
             {versions.map((version) => (
               <DropdownMenuItem
                 key={version}
-                onSelect={() => setSelectedVersion(version)}
               >
-                v{version}{" "}
+                <a target="_blank" href="https://www.instagram.com/itsabun_dis/">Dev By: Itsabun</a>
                 {version === selectedVersion && <Check className="ml-auto" />}
               </DropdownMenuItem>
             ))}

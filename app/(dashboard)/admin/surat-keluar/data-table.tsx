@@ -131,7 +131,6 @@ export default function DataTable<TData extends SuratKeluar, TValue>({ columns, 
 										data-state={row.getIsSelected() && "selected"}
 										onClick={() => {
 											handleRowClick(row);
-											console.log(row.original);
 										}}
 										className={'cursor-pointer'}
 									>

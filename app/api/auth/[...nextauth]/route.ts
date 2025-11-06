@@ -80,6 +80,17 @@ export const authOptions: NextAuthOptions = {
           return false;
         }
 
+        await prisma.user.update({
+          where: { id: existingUser.id },
+          data: {
+            // Update the image using the URL provided by NextAuth's 'user' object
+            image: user.image,
+            // Set emailVerified since Google provides a verified email
+            emailVerified: existingUser.emailVerified ?? new Date(),
+            // Optionally update the name if it's missing or different: name: user.name,
+          },
+        });
+
         // If found, link Google account to existing user automatically
         await prisma.account.upsert({
           where: {

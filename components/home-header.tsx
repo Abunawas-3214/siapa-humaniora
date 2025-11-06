@@ -2,8 +2,11 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { usePathname } from "next/navigation"
 
 export default function Header() {
+	const pathname = usePathname()
+	console.log("Current Pathname:", pathname)
 	return (
 		<header className="fixed top-0 z-50 w-full border-b border-gray-300 bg-white text-black shadow-md">
 			<div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
@@ -19,16 +22,18 @@ export default function Header() {
 					>
 						<path strokeLinecap="round" strokeLinejoin="round" d="M3 3h18M3 9h18M3 15h18M3 21h18" />
 					</svg>
-					<Link href="/" className="text-xl font-semibold tracking-tight">
+					<Link 
+					href="/" 
+					className="text-xl font-semibold tracking-tight">
 						SIAPA
 					</Link>
 				</div>
 
 				<nav className="hidden md:flex space-x-6 text-sm font-medium text-gray-400">
-					<Link href="/" className="hover:text-gray-500">
+					<Link href="/" className={`${pathname === '/' ? 'text-gray-800' : 'text-gray-400'} hover:text-gray-500`}>
 						Home
 					</Link>
-					<Link href="/statistik" className="hover:text-gray-700">
+					<Link href="/statistik" className={`${pathname?.startsWith('/statistik') ? 'text-gray-800' : 'text-gray-400'} hover:text-gray-700`}>
 						Statistik
 					</Link>
 				</nav>

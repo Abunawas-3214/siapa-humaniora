@@ -4,12 +4,12 @@ services:
   # 1. LAYANAN DATABASE (Tidak berubah)
   db:
     image: mysql:8.0
-    container_name: persuratan_mysql
-    restart: always 
+    container_name: siapa_mysql
+    restart: always
     env_file:
       - stack.env
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       timeout: 20s
       retries: 10
       start_period: 10s
@@ -19,16 +19,16 @@ services:
   # 2. LAYANAN SEED (Menggunakan build konteks)
   seed:
     # Ganti 'image' dengan 'build'
-    build: 
+    build:
       context: . # Merujuk pada direktori root (tempat Dockerfile berada)
     container_name: prisma_seeder
-    
+
     env_file:
       - stack.env
     depends_on:
       db:
         condition: service_healthy
-    
+
     command: sh -c "npx prisma migrate deploy && npm run prisma-seed"
     restart: "no"
 
@@ -37,19 +37,19 @@ services:
     # Ganti 'image' dengan 'build'
     build:
       context: .
-    container_name: nextjs_web_app
+    container_name: siapa_web_app
     restart: always
     ports:
-      - "3000:3000"
-      
+      - "${WEB_HOST_PORT}:3000"
+
     env_file:
       - stack.env
-      
+
     depends_on:
       db:
         condition: service_healthy
       seed:
         condition: service_completed_successfully
-    
+
 volumes:
   db_data:
