@@ -55,7 +55,7 @@ export function DataTableWithSWR() {
   // 3. Pass the dynamically fetched data to the existing DataTable
   return (
     <>
-      <DataTable columns={columnArray} data={data} />;
+      <DataTable columns={columnArray} data={data} />
       {/* Render the Delete Dialog component */}
       <SuratDeleteDialog
         open={isDeleteDialogOpen}

@@ -16,7 +16,16 @@ export const BREADCRUMB_DATA: BreadcrumbItem = {
             items: [
                 { title: "Tambah", url: "/admin/surat-masuk/tambah" },
                 // Use a wildcard (*) to match any ID segment
-                { title: "Edit", url: "/admin/surat-masuk/*/edit" } 
+                { title: "Edit", url: "/admin/surat-masuk/*/edit" }
+            ]
+        },
+        {
+            title: "Surat Keluar",
+            url: "/admin/surat-keluar",
+            items: [
+                { title: "Tambah", url: "/admin/surat-keluar/tambah" },
+                // Use a wildcard (*) to match any ID segment
+                { title: "Edit", url: "/admin/surat-keluar/*/edit" }
             ]
         },
         {
